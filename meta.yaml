@@ -1,0 +1,11 @@
+# Example of meta.yaml
+
+hello: echo "Hello, $USER"
+
+add:
+  args:
+    - a
+    - b
+  command: expr {{a}} + {{b}}
+
+install: cp meta.py $HOME/.local/bin/meta
