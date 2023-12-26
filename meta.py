@@ -7,6 +7,7 @@ import sys
 from yaml.loader import SafeLoader
 from pathlib import Path
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -18,6 +19,7 @@ class Arg:
 class Script:
     command: str
     args: list[Arg]
+    help: Optional[str] = None
 
 
 @dataclass
@@ -61,12 +63,14 @@ def parse_config(config: dict) -> Meta:
 
     for script_name, script_config in config.items():
         args = []
+        script_help = None
 
         if type(script_config) == str:
             # If config is a string, treat it as the command
             script_command = script_config
         elif type(script_config) == dict:
             script_command = script_config["command"]
+            script_help = script_config.get("help")
 
             if "args" in script_config:
                 for arg_name in script_config["args"]:
@@ -81,16 +85,40 @@ def parse_config(config: dict) -> Meta:
                 f"Could not parse script {script_name}: {script_config}"
             )
 
-        script = Script(script_command, args)
+        script = Script(script_command, args, script_help)
         scripts[script_name] = script
 
     return Meta(scripts)
 
 
+def print_help(meta: Meta):
+    print(f"Meta - {len(meta.scripts)} script(s)")
+
+    print("\nusage: meta {script} [...args]")
+
+    print("\nscripts:")
+    for script_name, script in meta.scripts.items():
+        print(f"  {script_name}", end=" ")
+        print(" ".join([
+            f"{{{arg.name}}}"
+            for arg in script.args
+        ]))
+
+        print(f"    $ {script.command}")
+
+        if script.help:
+            print(f"    {script.help}")
+
+
 def run_command(meta: Meta, script_name: str, script_arg_values: list[str]):
     """
-    Run command by replacing argument templates with the specified values
+    Run command by replacing each argument placeholde with the respective value
     """
+
+    if script_name == "help":
+        print_help(meta)
+        exit()
+
     match meta.scripts.get(script_name):
         case None:
             raise Exception(f"Unknown script name: {script_name}")
