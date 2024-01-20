@@ -1,0 +1,6 @@
+add: a b
+	expr $a + $b
+
+install:
+	go build meta.go
+	cp meta $HOME/.local/bin/meta

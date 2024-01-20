@@ -1,9 +1,0 @@
-hello: echo "Hello, $USER"
-
-add:
-  args: ['a', 'b']
-  command: expr {{a}} + {{b}}
-
-install:
-  command: cp meta.py $HOME/.local/bin/meta
-  help: "Install the script into $HOME/.local/bin/meta"
